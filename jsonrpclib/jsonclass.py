@@ -120,7 +120,10 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=[],
         return_obj['__jsonclass__'].append([])
         attrs = {}
         ignore_list = getattr(obj, ignore_attribute, []) + ignore
-        for attr_name, attr_value in obj.__dict__.items():
+        props = getattr(obj, "__dict__", {})
+        if hasattr(obj, "__slots__"):
+            props.update(((k, getattr(obj, k)) for k in obj.__slots__))
+        for attr_name, attr_value in props.items():
             if isinstance(attr_value, supported_types) and \
                     attr_name not in ignore_list and \
                     attr_value not in ignore_list:
