@@ -56,7 +56,8 @@ class Config(object):
     def __init__(self, version=2.0, content_type="application/json-rpc",
                  user_agent=None, use_jsonclass=True,
                  serialize_method='_serialize',
-                 ignore_attribute='_ignore'):
+                 ignore_attribute='_ignore',
+                 serialize_handlers={}):
         """
         Sets up a configuration of JSONRPClib
 
@@ -72,6 +73,9 @@ class Config(object):
                                  custom class object which holds strings and/or
                                  references of the attributes the class
                                  translator should ignore.
+        :param serialize_handlers: A dictionary of dump handler functions by
+                                   type for additional type support and for
+                                   overriding dump of built-in types in utils
         """
         # JSON-RPC specification
         self.version = version
@@ -103,6 +107,12 @@ class Config(object):
         # attribute on a custom class object which holds strings and / or
         # references of the attributes the class translator should ignore.
         self.ignore_attribute = ignore_attribute
+
+        # The list of serialize handler functions for jsonclass dump.
+        # Used for handling additional types and overriding built-in types.
+        # Functions are expected to have the same parameters as jsonclass dump
+        # (possibility to call standard jsonclass dump function within).
+        self.serialize_handlers = serialize_handlers
 
 # Default configuration
 DEFAULT = Config()

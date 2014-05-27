@@ -77,8 +77,13 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=[],
         ignore_attribute = config.ignore_attribute
 
     # Parse / return default "types"...
+    # Apply additional types, override built-in types
+    if isinstance(obj, tuple(config.serialize_handlers)):
+    	return config.serialize_handlers[type(obj)](obj, serialize_method, 
+     	                                            ignore_attribute, ignore)
+
     # Primitive
-    if isinstance(obj, utils.primitive_types):
+    elif isinstance(obj, utils.primitive_types):
         return obj
 
     # Iterative
@@ -123,8 +128,9 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=[],
         props = getattr(obj, "__dict__", {})
         if hasattr(obj, "__slots__"):
             props.update(((k, getattr(obj, k)) for k in obj.__slots__))
+        known_types = supported_types + tuple(config.serialize_handlers)
         for attr_name, attr_value in props.items():
-            if isinstance(attr_value, supported_types) and \
+            if isinstance(attr_value, known_types) and \
                     attr_name not in ignore_list and \
                     attr_value not in ignore_list:
                 attrs[attr_name] = dump(attr_value, serialize_method,
