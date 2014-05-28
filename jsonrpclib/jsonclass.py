@@ -55,7 +55,7 @@ class TranslationError(Exception):
 
 # ------------------------------------------------------------------------------
 
-def dump(obj, serialize_method=None, ignore_attribute=None, ignore=[],
+def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
          config=jsonrpclib.config.DEFAULT):
     """
     Transforms the given object into a JSON-RPC compliant form.
@@ -76,11 +76,14 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=[],
     if not ignore_attribute:
         ignore_attribute = config.ignore_attribute
 
+    if not ignore:
+        ignore = []
+
     # Parse / return default "types"...
     # Apply additional types, override built-in types
-    if isinstance(obj, tuple(config.serialize_handlers)):
-    	return config.serialize_handlers[type(obj)](obj, serialize_method, 
-     	                                            ignore_attribute, ignore)
+    if isinstance(obj, tuple(config.serialize_handlers.keys())):
+        return config.serialize_handlers[type(obj)](obj, serialize_method,
+                                                    ignore_attribute, ignore)
 
     # Primitive
     elif isinstance(obj, utils.primitive_types):

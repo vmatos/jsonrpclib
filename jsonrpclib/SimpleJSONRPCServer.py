@@ -124,7 +124,6 @@ class NoMulticallResult(Exception):
 
 
 class SimpleJSONRPCDispatcher(xmlrpcserver.SimpleXMLRPCDispatcher):
-
     def __init__(self, encoding=None, config=jsonrpclib.config.DEFAULT):
         """
         Sets up the dispatcher with the given encoding.
@@ -134,12 +133,10 @@ class SimpleJSONRPCDispatcher(xmlrpcserver.SimpleXMLRPCDispatcher):
             # Default encoding
             encoding = "UTF-8"
 
-
         xmlrpcserver.SimpleXMLRPCDispatcher.__init__(self,
                                                      allow_none=True,
                                                      encoding=encoding)
         self.json_config = config
-
 
     def _unmarshaled_dispatch(self, request, dispatch_method=None):
         """
@@ -192,13 +189,12 @@ class SimpleJSONRPCDispatcher(xmlrpcserver.SimpleXMLRPCDispatcher):
                 return result.dump()
 
             # Call the method
-            response = self._marshaled_single_dispatch(request, dispatch_method)
-
+            response = self._marshaled_single_dispatch(request,
+                                                       dispatch_method)
             if isinstance(response, Fault):
                 return response.dump()
 
             return response
-
 
     def _marshaled_dispatch(self, data, dispatch_method=None):
         """
@@ -235,7 +231,6 @@ class SimpleJSONRPCDispatcher(xmlrpcserver.SimpleXMLRPCDispatcher):
         except NoMulticallResult:
             # Return an empty string (jsonrpclib internal behaviour)
             return ''
-
 
     def _marshaled_single_dispatch(self, request, dispatch_method=None):
         """
@@ -280,7 +275,6 @@ class SimpleJSONRPCDispatcher(xmlrpcserver.SimpleXMLRPCDispatcher):
             fault = Fault(-32603, '{0}:{1}'.format(exc_type, exc_value),
                           config=self.json_config)
             return fault.dump()
-
 
     def _dispatch(self, method, params):
         """
@@ -463,7 +457,6 @@ class CGIJSONRPCRequestHandler(SimpleJSONRPCDispatcher):
         :param config: A JSONRPClib Config instance
         """
         SimpleJSONRPCDispatcher.__init__(self, encoding, config)
-
 
     def handle_jsonrpc(self, request_text):
         """

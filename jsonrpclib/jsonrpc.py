@@ -157,7 +157,7 @@ class AppError(ProtocolError):
 
         :return: The data associated to the error, or None
         """
-        return self[0][2]
+        return self.args[0][2]
 
 
 class TransportMixIn(object):
@@ -204,7 +204,6 @@ class TransportMixIn(object):
         assert self.additional_headers[-1] == headers
         self.additional_headers.pop()
 
-
     def emit_additional_headers(self, connection):
         """
         Puts headers as is in the request, filtered read only headers
@@ -228,7 +227,6 @@ class TransportMixIn(object):
             if key.lower() not in self.readonly_headers:
                 # Only accept replaceable headers
                 connection.putheader(str(key), str(value))
-
 
     def send_content(self, connection, request_body):
         # Convert the body first
@@ -295,7 +293,6 @@ class ServerProxy(XMLServerProxy):
     Unfortunately, much more of this class has to be copied since
     so much of it does the serialization.
     """
-
     def __init__(self, uri, transport=None, encoding=None,
                  verbose=0, version=None, headers=None, history=None,
                  config=jsonrpclib.config.DEFAULT):
@@ -397,7 +394,6 @@ class ServerProxy(XMLServerProxy):
             # Not available in Python 2.6
             pass
 
-
     def __call__(self, attr):
         """
         A workaround to get special attributes on the ServerProxy
@@ -413,7 +409,6 @@ class ServerProxy(XMLServerProxy):
 
         raise AttributeError("Attribute {0} not found".format(attr))
 
-
     @property
     def _notify(self):
         # Just like __getattr__, but with notify namespace.
@@ -422,13 +417,13 @@ class ServerProxy(XMLServerProxy):
     @contextlib.contextmanager
     def _additional_headers(self, headers):
         """
-            Allow to specify additional headers, to be added inside the with
-            block. Example of usage:
+        Allow to specify additional headers, to be added inside the with
+        block. Example of usage:
 
-            >>> with client._additional_headers({'X-Test' : 'Test'}) as new_client:
-            ...     new_client.method()
-            ...
-            >>> # Here old headers are restored
+        >>> with client._additional_headers({'X-Test' : 'Test'}) as new_client:
+        ...     new_client.method()
+        ...
+        >>> # Here old headers are restored
         """
         self.__transport.push_headers(headers)
         yield self
@@ -440,8 +435,8 @@ class _Method(XML_Method):
 
     def __call__(self, *args, **kwargs):
         if len(args) > 0 and len(kwargs) > 0:
-            raise ProtocolError('Cannot use both positional ' +
-                'and keyword arguments (according to JSON-RPC spec.)')
+            raise ProtocolError("Cannot use both positional and keyword "
+                                "arguments (according to JSON-RPC spec.)")
         if len(args) > 0:
             return self.__send(self.__name, args)
         else:
@@ -537,8 +532,8 @@ class MultiCall(object):
         if len(self._job_list) < 1:
             # Should we alert? This /is/ pretty obvious.
             return
-        request_body = '[ %s ]' % ','.join([job.request() for
-                                          job in self._job_list])
+        request_body = "[ {0} ]".format(','.join(job.request()
+                                                 for job in self._job_list))
         responses = self._server._run_request(request_body)
         del self._job_list[:]
         if not responses:
@@ -587,7 +582,7 @@ class Fault(object):
 
         :returns: A {'code', 'message'} dictionary
         """
-        return {'code':self.faultCode, 'message':self.faultString}
+        return {'code': self.faultCode, 'message': self.faultString}
 
     def response(self, rpcid=None, version=None):
         """
@@ -649,8 +644,7 @@ class Payload(object):
         self.id = rpcid
         self.version = float(version)
 
-
-    def request(self, method, params=[]):
+    def request(self, method, params=None):
         """
         Prepares a method call request
 
@@ -665,17 +659,16 @@ class Payload(object):
             # Generate a request ID
             self.id = str(uuid.uuid4())
 
-        request = { 'id':self.id, 'method':method }
+        request = {'id': self.id, 'method': method}
         if params or self.version < 1.1:
-            request['params'] = params
+            request['params'] = params or []
 
         if self.version >= 2:
             request['jsonrpc'] = str(self.version)
 
         return request
 
-
-    def notify(self, method, params=[]):
+    def notify(self, method, params=None):
         """
         Prepares a notification request
 
@@ -694,7 +687,6 @@ class Payload(object):
 
         return request
 
-
     def response(self, result=None):
         """
         Prepares a response dictionary
@@ -702,7 +694,7 @@ class Payload(object):
         :param result: The result of method call
         :return: A JSON-RPC response dictionary
         """
-        response = {'result':result, 'id':self.id}
+        response = {'result': result, 'id': self.id}
 
         if self.version >= 2:
             response['jsonrpc'] = str(self.version)
@@ -710,7 +702,6 @@ class Payload(object):
             response['error'] = None
 
         return response
-
 
     def error(self, code=-32000, message='Server error.'):
         """
@@ -725,12 +716,12 @@ class Payload(object):
             del error['result']
         else:
             error['result'] = None
-        error['error'] = {'code':code, 'message':message}
+        error['error'] = {'code': code, 'message': message}
         return error
 
 # ------------------------------------------------------------------------------
 
-def dump(params=[], methodname=None, rpcid=None, version=None,
+def dump(params=None, methodname=None, rpcid=None, version=None,
          is_response=None, is_notify=None, config=jsonrpclib.config.DEFAULT):
     """
     Prepares a JSON-RPC dictionary (request, notification, response or error)
@@ -748,6 +739,9 @@ def dump(params=[], methodname=None, rpcid=None, version=None,
     if not version:
         version = config.version
 
+    if params is None:
+        params = []
+
     # Validate method name and parameters
     valid_params = (utils.TupleType, utils.ListType, utils.DictType, Fault)
     if methodname in utils.StringTypes and \
@@ -756,12 +750,13 @@ def dump(params=[], methodname=None, rpcid=None, version=None,
         If a method, and params are not in a listish or a Fault,
         error out.
         """
-        raise TypeError('Params must be a dict, list, tuple or Fault instance.')
+        raise TypeError("Params must be a dict, list, tuple "
+                        "or Fault instance.")
 
     # Prepares the JSON-RPC content
     payload = Payload(rpcid=rpcid, version=version)
 
-    if type(params) is Fault:
+    if isinstance(params, Fault):
         # Prepare an error dictionary
         return payload.error(params.faultCode, params.faultString)
 
@@ -790,7 +785,7 @@ def dump(params=[], methodname=None, rpcid=None, version=None,
         return payload.request(methodname, params)
 
 
-def dumps(params=[], methodname=None, methodresponse=None,
+def dumps(params=None, methodname=None, methodresponse=None,
           encoding=None, rpcid=None, version=None, notify=None,
           config=jsonrpclib.config.DEFAULT):
     """

@@ -57,7 +57,7 @@ class Config(object):
                  user_agent=None, use_jsonclass=True,
                  serialize_method='_serialize',
                  ignore_attribute='_ignore',
-                 serialize_handlers={}):
+                 serialize_handlers=None):
         """
         Sets up a configuration of JSONRPClib
 
@@ -112,7 +112,7 @@ class Config(object):
         # Used for handling additional types and overriding built-in types.
         # Functions are expected to have the same parameters as jsonclass dump
         # (possibility to call standard jsonclass dump function within).
-        self.serialize_handlers = serialize_handlers
+        self.serialize_handlers = serialize_handlers or {}
 
 # Default configuration
 DEFAULT = Config()

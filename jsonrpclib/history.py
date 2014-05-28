@@ -84,7 +84,6 @@ class History(object):
         except IndexError:
             return None
 
-
     def clear(self):
         """
         Clears the history lists
