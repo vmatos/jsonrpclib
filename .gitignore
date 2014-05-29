@@ -2,8 +2,13 @@
 *.pyc
 __pycache__
 
+# Eclipse settings
+.settings
+
 # Tox
-.tox
+.tox/
+.coverage
+htmlcov/
 
 # When installed in develop mode
 *.egg-info/
@@ -11,3 +16,5 @@ __pycache__
 # setup.py folders
 build/*
 dist/*
+*.egg-info/
+
