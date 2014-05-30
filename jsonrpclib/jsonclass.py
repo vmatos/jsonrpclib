@@ -15,6 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+TODO: Support inheritance with __slots__
+
 :license: Apache License 2.0
 :version: 0.1.6
 """
@@ -109,7 +111,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         json_class = '{0}.{1}'.format(module_name, json_class)
 
     # Keep the class name in the returned object
-    return_obj = {"__jsonclass__": [json_class, ]}
+    return_obj = {"__jsonclass__": [json_class]}
 
     # If a serialization method is defined..
     if serialize_method in dir(obj):
