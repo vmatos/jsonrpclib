@@ -1,6 +1,17 @@
 JSONRPClib (patched for Pelix)
 ##############################
 
+.. image:: https://pypip.in/license/jsonrpclib-pelix/badge.svg
+    :target: https://pypi.python.org/pypi/jsonrpclib-pelix/
+
+.. image:: https://travis-ci.org/tcalmant/jsonrpclib.svg?branch=master
+    :target: https://travis-ci.org/tcalmant/jsonrpclib
+
+
+.. image:: https://coveralls.io/repos/tcalmant/jsonrpclib/badge.png?branch=master
+    :target: https://coveralls.io/r/tcalmant/jsonrpclib?branch=master
+    
+
 This library is an implementation of the JSON-RPC specification.
 It supports both the original 1.0 specification, as well as the
 new (proposed) 2.0 specification, which includes batch submission, keyword
@@ -298,10 +309,11 @@ over JSON:
 Tests
 *****
 
-I've dropped almost-verbatim tests from the JSON-RPC spec 2.0 page.
-You can run it with:
+Tests are an almost-verbatim drop from the JSON-RPC specification 2.0 page.
+They can be run using *unittest* or *nosetest*:
 
 .. code-block:: console
 
-   python tests.py
-   python3 tests.py
+   python -m unittest discover tests
+   python3 -m unittest discover tests
+   nosetests tests
