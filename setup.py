@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 # Module version
-__version_info__ = (0, 1, 6, 1)
+__version_info__ = (0, 1, 7)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
@@ -33,7 +33,7 @@ except ImportError:
 
 setup(name="jsonrpclib-pelix",
       version=__version__,
-      license="http://www.apache.org/licenses/LICENSE-2.0",
+      license="Apache License 2.0",
       author="Thomas Calmant",
       author_email="thomas.calmant+github@gmail.com",
       url="http://github.com/tcalmant/jsonrpclib/",
@@ -56,4 +56,5 @@ setup(name="jsonrpclib-pelix",
             'Programming Language :: Python :: 3.1',
             'Programming Language :: Python :: 3.2',
             'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
     ])

@@ -18,11 +18,11 @@ limitations under the License.
 TODO: Support inheritance with __slots__
 
 :license: Apache License 2.0
-:version: 0.1.6
+:version: 0.1.7
 """
 
 # Module version
-__version_info__ = (0, 1, 6)
+__version_info__ = (0, 1, 7)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
