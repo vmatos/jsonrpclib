@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -- Content-Encoding: UTF-8 --
 """
-Tests JSON-RPC compatibility 
+Tests JSON-RPC compatibility
 
 :license: Apache License 2.0
 """
 
 # Tests utilities
-from .utilities import UtilityServer
+from tests.utilities import UtilityServer
 
 # JSON-RPC library
 import jsonrpclib
