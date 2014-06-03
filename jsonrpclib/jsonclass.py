@@ -15,8 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-TODO: Support inheritance with __slots__
-
 :license: Apache License 2.0
 :version: 0.1.7
 """
@@ -56,6 +54,35 @@ class TranslationError(Exception):
     pass
 
 # ------------------------------------------------------------------------------
+
+def _predicate_field(member):
+    """
+    Predicate for inspect.getmembers(). Excludes methods, functions and
+    built-ins.
+
+    :param member: Member to filter
+    :return: True if the member is not a method
+    """
+    # __self__ is a field specific to the method-wrapper type in CPython 3
+    return not inspect.isroutine(member) \
+        and not inspect.ismethod(member) \
+        and not inspect.ismemberdescriptor(member) \
+        and not inspect.isbuiltin(member) \
+        and not hasattr(member, '__self__')
+
+
+def _filter_fields(bean):
+    """
+    Returns the fields in the given bean, excluding methods and special fields
+    (e.g.: __init___).
+
+    :param bean: The bean to filter
+    :return: A dictionary: field name -> value
+    """
+    return dict((name, value)
+                for name, value in inspect.getmembers(bean, _predicate_field)
+                if not (name.startswith('__') and name.endswith('__')))
+
 
 def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
          config=jsonrpclib.config.DEFAULT):
@@ -129,12 +156,10 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         # parameters passed to __init__
         return_obj['__jsonclass__'].append([])
         attrs = {}
+        fields = _filter_fields(obj)
         ignore_list = getattr(obj, ignore_attribute, []) + ignore
-        props = getattr(obj, "__dict__", {})
-        if hasattr(obj, "__slots__"):
-            props.update(((k, getattr(obj, k)) for k in obj.__slots__))
         known_types = supported_types + tuple(config.serialize_handlers)
-        for attr_name, attr_value in props.items():
+        for attr_name, attr_value in fields.items():
             if isinstance(attr_value, known_types) and \
                     attr_name not in ignore_list and \
                     attr_value not in ignore_list:

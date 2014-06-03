@@ -3,7 +3,7 @@
 """
 Tests the jsonclass module, for bean (de)serialization
 
-TODO: Support inheritance with __slots__ and test custom serialization
+TODO: test custom serialization
 
 :license: Apache License 2.0
 """
@@ -188,12 +188,14 @@ class SerializationTests(unittest.TestCase):
         """
         Tests dump & load of a custom type
         """
-        # TODO: Add (support and) tests for InheritanceSlotBean
         types = {Bean: ('public', '_protected', '_Bean__private'),
                  InheritanceBean: ('public', '_protected', 'first', '_second'),
-                 SlotBean: ('public', '_protected')}
+                 SlotBean: ('public', '_protected'),
+                 InheritanceSlotBean: ('public', '_protected',
+                                       'first', '_second'), }
 
         for clazz, fields in types.items():
+            # Prepare the bean
             data = clazz()
 
             # Dump it...
@@ -203,6 +205,11 @@ class SerializationTests(unittest.TestCase):
             self.assertIn('__jsonclass__', serialized)
             for field in fields:
                 self.assertIn(field, serialized)
+
+            # Check class name
+            self.assertEqual(serialized['__jsonclass__'][0],
+                             '{0}.{1}'.format(clazz.__module__,
+                                              clazz.__name__))
 
             # Reload it
             deserialized = load(serialized)
