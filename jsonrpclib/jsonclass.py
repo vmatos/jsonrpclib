@@ -131,7 +131,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
                     for key, value in obj.items())
 
     # It's not a standard type, so it needs __jsonclass__
-    module_name = inspect.getmodule(obj).__name__
+    module_name = inspect.getmodule(type(obj)).__name__
     json_class = obj.__class__.__name__
 
     if module_name not in ('', '__main__'):
