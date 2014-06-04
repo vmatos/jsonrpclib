@@ -55,35 +55,6 @@ class TranslationError(Exception):
 
 # ------------------------------------------------------------------------------
 
-def _predicate_field(member):
-    """
-    Predicate for inspect.getmembers(). Excludes methods, functions and
-    built-ins.
-
-    :param member: Member to filter
-    :return: True if the member is not a method
-    """
-    # __self__ is a field specific to the method-wrapper type in CPython 3
-    return not inspect.isroutine(member) \
-        and not inspect.ismethod(member) \
-        and not inspect.ismemberdescriptor(member) \
-        and not inspect.isbuiltin(member) \
-        and not hasattr(member, '__self__')
-
-
-def _filter_fields(bean):
-    """
-    Returns the fields in the given bean, excluding methods and special fields
-    (e.g.: __init___).
-
-    :param bean: The bean to filter
-    :return: A dictionary: field name -> value
-    """
-    return dict((name, value)
-                for name, value in inspect.getmembers(bean, _predicate_field)
-                if not (name.startswith('__') and name.endswith('__')))
-
-
 def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
          config=jsonrpclib.config.DEFAULT):
     """
@@ -110,7 +81,8 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
 
     # Parse / return default "types"...
     # Apply additional types, override built-in types
-    if isinstance(obj, tuple(config.serialize_handlers.keys())):
+    # (reminder: config.serialize_handlers is a dict)
+    if isinstance(obj, tuple(config.serialize_handlers)):
         return config.serialize_handlers[type(obj)](obj, serialize_method,
                                                     ignore_attribute, ignore)
 
@@ -141,7 +113,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
     return_obj = {"__jsonclass__": [json_class]}
 
     # If a serialization method is defined..
-    if serialize_method in dir(obj):
+    if hasattr(obj, serialize_method):
         # Params can be a dict (keyword) or list (positional)
         # Attrs MUST be a dict.
         serialize = getattr(obj, serialize_method)
@@ -155,13 +127,37 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         # Obviously, we can't assume to know anything about the
         # parameters passed to __init__
         return_obj['__jsonclass__'].append([])
-        attrs = {}
-        fields = _filter_fields(obj)
-        ignore_list = getattr(obj, ignore_attribute, []) + ignore
+
+        # Prepare filtering lists
         known_types = supported_types + tuple(config.serialize_handlers)
-        for attr_name, attr_value in fields.items():
+        ignore_list = getattr(obj, ignore_attribute, []) + ignore
+
+        # Find fields...
+        fields = set()
+
+        # ... class-level
+        for storage in ('__dict__', '__slots__'):
+            try:
+                fields.update(getattr(obj, storage))
+            except AttributeError:
+                pass
+
+        # ... parent classes level
+        for base_class in obj.__class__.__bases__:
+            try:
+                fields.update(base_class.__slots__)
+            except AttributeError:
+                # No slots
+                pass
+
+        # ... filter fields by name
+        fields.difference_update(ignore_list)
+
+        # Dump field values
+        attrs = {}
+        for attr_name in fields:
+            attr_value = getattr(obj, attr_name)
             if isinstance(attr_value, known_types) and \
-                    attr_name not in ignore_list and \
                     attr_value not in ignore_list:
                 attrs[attr_name] = dump(attr_value, serialize_method,
                                         ignore_attribute, ignore)
