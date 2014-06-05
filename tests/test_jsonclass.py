@@ -140,7 +140,7 @@ class SerializationTests(unittest.TestCase):
     """
     def setUp(self):
         """
-        Tests initalization
+        Tests initialization
         """
         # Compatibility issue between Python 2 & 3
         if sys.version_info[0] < 3:
@@ -242,9 +242,12 @@ class SerializationTests(unittest.TestCase):
             # Reload it
             deserialized = load(serialized)
 
-            # Dictionary is modified
-            self.assertNotIn('__jsonclass__', serialized,
-                             "Serialized dictionary not cleaned up")
+            # Dictionary is left as-is
+            self.assertIn('__jsonclass__', serialized,
+                          "Serialized dictionary has been modified")
+            self.assertFalse(hasattr(deserialized, '__jsonclass__'),
+                             "The deserialized bean shouldn't have a "
+                             "__jsonclass__ attribute")
 
             # Check deserialized value
             self.assertIs(type(deserialized), type(data))

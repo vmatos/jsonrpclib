@@ -39,11 +39,11 @@ import re
 # ------------------------------------------------------------------------------
 
 # Supported transmitted code
-supported_types = (utils.DictType,) + utils.iterable_types \
+SUPPORTED_TYPES = (utils.DictType,) + utils.iterable_types \
                   + utils.primitive_types
 
 # Regex of invalid module characters
-invalid_module_chars = r'[^a-zA-Z0-9\_\.]'
+INVALID_MODULE_CHARS = r'[^a-zA-Z0-9\_\.]'
 
 # ------------------------------------------------------------------------------
 
@@ -164,7 +164,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         return_obj['__jsonclass__'].append([])
 
         # Prepare filtering lists
-        known_types = supported_types + tuple(config.serialize_handlers)
+        known_types = SUPPORTED_TYPES + tuple(config.serialize_handlers)
         ignore_list = getattr(obj, ignore_attribute, []) + ignore
 
         # Find fields and filter them by name
@@ -203,7 +203,7 @@ def load(obj, classes=None):
         return [load(entry) for entry in obj]
 
     # Otherwise, it's a dict type
-    elif '__jsonclass__' not in obj.keys():
+    elif '__jsonclass__' not in obj:
         return dict((key, load(value)) for key, value in obj.items())
 
     # It's a dictionary, and it has a __jsonclass__
@@ -214,7 +214,7 @@ def load(obj, classes=None):
     if not orig_module_name:
         raise TranslationError('Module name empty.')
 
-    json_module_clean = re.sub(invalid_module_chars, '', orig_module_name)
+    json_module_clean = re.sub(INVALID_MODULE_CHARS, '', orig_module_name)
     if json_module_clean != orig_module_name:
         raise TranslationError('Module name {0} has invalid characters.' \
                                .format(orig_module_name))
@@ -273,10 +273,13 @@ def load(obj, classes=None):
 
     # Remove the class information, as it must be ignored during the
     # reconstruction of the object
-    del obj['__jsonclass__']
+    raw_jsonclass = obj.pop('__jsonclass__')
 
     for key, value in obj.items():
         # Recursive loading
         setattr(new_obj, key, load(value, classes))
+
+    # Restore the class information for further usage
+    obj['__jsonclass__'] = raw_jsonclass
 
     return new_obj
