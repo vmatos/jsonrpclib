@@ -48,11 +48,11 @@ appropriately.
 See https://github.com/tcalmant/jsonrpclib for more info.
 
 :license: Apache License 2.0
-:version: 0.1.7
+:version: 0.1.8
 """
 
 # Module version
-__version_info__ = (0, 1, 7)
+__version_info__ = (0, 1, 8)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
