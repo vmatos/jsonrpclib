@@ -55,6 +55,45 @@ class TranslationError(Exception):
 
 # ------------------------------------------------------------------------------
 
+def _slots_finder(clazz, fields_set):
+    """
+    Recursively visits the class hierarchy to find all slots
+
+    :param clazz: Class to analyze
+    :param fields_set: Set where to store __slots___ content
+    """
+    # ... class level
+    try:
+        fields_set.update(clazz.__slots__)
+    except AttributeError:
+        pass
+
+    # ... parent classes level
+    for base_class in clazz.__bases__:
+        _slots_finder(base_class, fields_set)
+
+
+def _find_fields(obj):
+    """
+    Returns the names of the fields of the given object
+
+    :param obj: An object to analyze
+    :return: A set of field names
+    """
+    # Find fields...
+    fields = set()
+
+    # ... using __dict__
+    try:
+        fields.update(obj.__dict__)
+    except AttributeError:
+        pass
+
+    # ... using __slots__
+    _slots_finder(obj.__class__, fields)
+    return fields
+
+
 def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
          config=jsonrpclib.config.DEFAULT):
     """
@@ -70,14 +109,10 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
     :param config: A JSONRPClib Config instance
     :return: A JSON-RPC compliant object
     """
-    if not serialize_method:
-        serialize_method = config.serialize_method
-
-    if not ignore_attribute:
-        ignore_attribute = config.ignore_attribute
-
-    if not ignore:
-        ignore = []
+    # Normalize arguments
+    serialize_method = serialize_method or config.serialize_method
+    ignore_attribute = ignore_attribute or config.ignore_attribute
+    ignore = ignore or []
 
     # Parse / return default "types"...
     # Apply additional types, override built-in types
@@ -132,25 +167,8 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         known_types = supported_types + tuple(config.serialize_handlers)
         ignore_list = getattr(obj, ignore_attribute, []) + ignore
 
-        # Find fields...
-        fields = set()
-
-        # ... class-level
-        for storage in ('__dict__', '__slots__'):
-            try:
-                fields.update(getattr(obj, storage))
-            except AttributeError:
-                pass
-
-        # ... parent classes level
-        for base_class in obj.__class__.__bases__:
-            try:
-                fields.update(base_class.__slots__)
-            except AttributeError:
-                # No slots
-                pass
-
-        # ... filter fields by name
+        # Find fields and filter them by name
+        fields = _find_fields(obj)
         fields.difference_update(ignore_list)
 
         # Dump field values
@@ -164,6 +182,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
         return_obj.update(attrs)
         return return_obj
 
+# ------------------------------------------------------------------------------
 
 def load(obj, classes=None):
     """
