@@ -10,8 +10,10 @@ TODO: test custom serialization
 
 # JSON-RPC library
 from jsonrpclib.jsonclass import dump, load
+import jsonrpclib.config
 
 # Standard library
+import datetime
 import sys
 try:
     import unittest2 as unittest
@@ -221,3 +223,33 @@ class SerializationTests(unittest.TestCase):
             # Check deserialized value
             self.assertIs(type(deserialized), type(data))
             self.assertEqual(deserialized, data)
+
+    def test_config_custom(self):
+        """
+        Tests configured custom serializer
+        """
+        # Get the current time object
+        now = datetime.datetime.now()
+
+        # Check if it is correctly serialized
+        std_serialized = dump(now)
+        self.assertEqual(std_serialized['__jsonclass__'][0],
+                         'datetime.datetime')
+
+        # Configure a custom serializer
+        def datetime_serializer(obj, serialize_method, ignore_attribute,
+                                ignore):
+            """
+            Custom datetime serializer (returns an ISO date string)
+            """
+            self.assertIs(type(obj), datetime.datetime)
+            return obj.isoformat()
+
+        handlers = {datetime.datetime: datetime_serializer}
+        config = jsonrpclib.config.Config(serialize_handlers=handlers)
+
+        # Dump with out configuration
+        custom_serialized = dump(now, config=config)
+
+        # This should be a raw string
+        self.assertEqual(custom_serialized, now.isoformat())
