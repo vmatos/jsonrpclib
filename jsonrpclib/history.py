@@ -62,8 +62,6 @@ class History(object):
     def request(self):
         """
         Returns the latest stored request or None
-
-        :return: The latest stored request
         """
         try:
             return self.requests[-1]
@@ -75,8 +73,6 @@ class History(object):
     def response(self):
         """
         Returns the latest stored response or None
-
-        :return: The latest stored response
         """
         try:
             return self.responses[-1]
