@@ -109,6 +109,29 @@ class InheritanceSlotBean(SlotBean):
             and self.first == other.first \
             and self._second == other._second
 
+
+class SecondInheritanceSlotBean(InheritanceSlotBean):
+    """
+    Grand-child bean using slots
+    """
+    __slots__ = ('third', '_fourth')
+
+    def __init__(self):
+        """
+        Sets up members
+        """
+        InheritanceSlotBean.__init__(self)
+        self.third = False
+        self._fourth = [4, 5, 6]
+
+    def __eq__(self, other):
+        """
+        Checks equality
+        """
+        return InheritanceSlotBean.__eq__(self, other) \
+            and self.third == other.third \
+            and self._fourth == other._fourth
+
 # ------------------------------------------------------------------------------
 
 class SerializationTests(unittest.TestCase):
@@ -194,7 +217,10 @@ class SerializationTests(unittest.TestCase):
                  InheritanceBean: ('public', '_protected', 'first', '_second'),
                  SlotBean: ('public', '_protected'),
                  InheritanceSlotBean: ('public', '_protected',
-                                       'first', '_second'), }
+                                       'first', '_second'),
+                 SecondInheritanceSlotBean: ('public', '_protected',
+                                             'first', '_second',
+                                             'third', '_fourth'), }
 
         for clazz, fields in types.items():
             # Prepare the bean
@@ -222,7 +248,8 @@ class SerializationTests(unittest.TestCase):
 
             # Check deserialized value
             self.assertIs(type(deserialized), type(data))
-            self.assertEqual(deserialized, data)
+            self.assertEqual(deserialized, data,
+                             "Source and deserialized bean are not equal")
 
     def test_config_custom(self):
         """
