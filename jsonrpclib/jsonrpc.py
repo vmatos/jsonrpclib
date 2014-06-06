@@ -767,7 +767,7 @@ def dump(params=None, methodname=None, rpcid=None, version=None,
 
     if config.use_jsonclass:
         # Use jsonclass to convert the parameters
-        params = jsonclass.dump(params)
+        params = jsonclass.dump(params, config=config)
 
     if is_response:
         # Prepare a response dictionary
