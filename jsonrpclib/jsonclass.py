@@ -128,13 +128,15 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
     # Iterative
     elif isinstance(obj, utils.iterable_types):
         # List, set or tuple
-        return [dump(item, serialize_method, ignore_attribute, ignore)
+        return [dump(item, serialize_method, ignore_attribute, ignore,
+                     config=config)
                 for item in obj]
 
     elif isinstance(obj, utils.DictType):
         # Dictionary
         return dict((key, dump(value, serialize_method,
-                               ignore_attribute, ignore))
+                               ignore_attribute, ignore,
+                               config=config))
                     for key, value in obj.items())
 
     # It's not a standard type, so it needs __jsonclass__
@@ -178,7 +180,8 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
             if isinstance(attr_value, known_types) and \
                     attr_value not in ignore_list:
                 attrs[attr_name] = dump(attr_value, serialize_method,
-                                        ignore_attribute, ignore)
+                                        ignore_attribute, ignore,
+                                        config=config)
         return_obj.update(attrs)
         return return_obj
 
