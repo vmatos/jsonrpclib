@@ -446,11 +446,11 @@ class _Method(XML_Method):
         if name == "__name__":
             return self.__name
 
-        self.__name = '%s.%s' % (self.__name, name)
+        self.__name = "{0}.{1}".format(self.__name, name)
         return self
         # The old method returned a new instance, but this seemed wasteful.
         # The only thing that changes is the name.
-        # return _Method(self.__send, "%s.%s" % (self.__name, name))
+        # return _Method(self.__send, "{0}.{1}".format(self.__name, name))
 
 class _Notify(object):
     def __init__(self, request):
@@ -485,10 +485,10 @@ class MultiCallMethod(object):
                      config=self._config)
 
     def __repr__(self):
-        return '%s' % self.request()
+        return str(self.request())
 
     def __getattr__(self, method):
-        new_method = '%s.%s' % (self.method, method)
+        new_method = "{0}.{1}".format(self.method, method)
         self.method = new_method
         return self
 
