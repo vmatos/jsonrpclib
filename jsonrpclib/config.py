@@ -16,11 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 :license: Apache License 2.0
-:version: 0.1.7
+:version: 0.1.9
 """
 
 # Module version
-__version_info__ = (0, 1, 7)
+__version_info__ = (0, 1, 9)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
@@ -113,6 +113,16 @@ class Config(object):
         # Functions are expected to have the same parameters as jsonclass dump
         # (possibility to call standard jsonclass dump function within).
         self.serialize_handlers = serialize_handlers or {}
+
+    def copy(self):
+        """
+        Returns a shallow copy of this configuration bean
+
+        :return: A shallow copy of this configuration
+        """
+        return Config(self.version, self.content_type, self.user_agent,
+                      self.use_jsonclass, self.serialize_method,
+                      self.ignore_attribute, self.serialize_handlers)
 
 # Default configuration
 DEFAULT = Config()
