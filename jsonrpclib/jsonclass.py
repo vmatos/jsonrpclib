@@ -16,11 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 :license: Apache License 2.0
-:version: 0.1.8
+:version: 0.1.9
 """
 
 # Module version
-__version_info__ = (0, 1, 8)
+__version_info__ = (0, 1, 9)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
@@ -128,15 +128,13 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
     # Iterative
     elif isinstance(obj, utils.iterable_types):
         # List, set or tuple
-        return [dump(item, serialize_method, ignore_attribute, ignore,
-                     config=config)
+        return [dump(item, serialize_method, ignore_attribute, ignore, config)
                 for item in obj]
 
     elif isinstance(obj, utils.DictType):
         # Dictionary
         return dict((key, dump(value, serialize_method,
-                               ignore_attribute, ignore,
-                               config=config))
+                               ignore_attribute, ignore, config))
                     for key, value in obj.items())
 
     # It's not a standard type, so it needs __jsonclass__
@@ -180,8 +178,7 @@ def dump(obj, serialize_method=None, ignore_attribute=None, ignore=None,
             if isinstance(attr_value, known_types) and \
                     attr_value not in ignore_list:
                 attrs[attr_name] = dump(attr_value, serialize_method,
-                                        ignore_attribute, ignore,
-                                        config=config)
+                                        ignore_attribute, ignore, config)
         return_obj.update(attrs)
         return return_obj
 
