@@ -366,7 +366,7 @@ class SimpleJSONRPCRequestHandler(xmlrpcserver.SimpleXMLRPCRequestHandler):
         self.send_header("Access-Control-Allow-Headers", 
                          "Origin, X-Requested-With, Content-Type, Accept")
         self.send_header("Access-Control-Allow-Origin", "*")
-        SimpleXMLRPCServer.SimpleXMLRPCRequestHandler.end_headers(self)
+        xmlrpcserver.SimpleXMLRPCRequestHandler.end_headers(self)
   
     
     def do_POST(self):
