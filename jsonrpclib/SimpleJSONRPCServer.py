@@ -355,6 +355,20 @@ class SimpleJSONRPCRequestHandler(xmlrpcserver.SimpleXMLRPCRequestHandler):
     The server that receives the requests must have a json_config member,
     containing a JSONRPClib Config instance
     """
+    def do_OPTIONS(self):
+        """
+        Handles OPTIONS requests
+        """
+        self.send_response(200)
+        self.end_headers()
+
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Headers", 
+                         "Origin, X-Requested-With, Content-Type, Accept")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        SimpleXMLRPCServer.SimpleXMLRPCRequestHandler.end_headers(self)
+  
+    
     def do_POST(self):
         """
         Handles POST requests
